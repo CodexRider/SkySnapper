@@ -2,24 +2,57 @@ import SwiftUI
 
 struct CitySearchView: View {
     @Environment(\.dismiss) private var dismiss
+    @StateObject private var viewModel = SearchViewModel()
     @State private var searchText = ""
-    @State private var cities: [String] = []
     let onCitySelected: (String) -> Void
     
     var body: some View {
         NavigationStack {
-            List {
-                ForEach(filteredCities, id: \.self) { city in
-                    Button(action: {
-                        onCitySelected(city)
-                        dismiss()
-                    }) {
-                        Text(city)
-                            .font(.headline)
+            VStack {
+                if viewModel.isLoading {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle())
+                } else if let error = viewModel.error {
+                    VStack(spacing: 15) {
+                        Image(systemName: "exclamationmark.triangle")
+                            .font(.system(size: 50))
+                            .foregroundColor(.red)
+                        
+                        Text(error.localizedDescription)
+                            .foregroundColor(.red)
+                            .multilineTextAlignment(.center)
+                            .padding()
+                    }
+                } else {
+                    List(viewModel.searchResults) { city in
+                        Button(action: {
+                            onCitySelected(city.name)
+                            dismiss()
+                        }) {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(city.name)
+                                    .font(.headline)
+                                HStack {
+                                    Text(city.country)
+                                        .font(.subheadline)
+                                        .foregroundStyle(.secondary)
+                                    if let state = city.state {
+                                        Text("• \(state)")
+                                            .font(.subheadline)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
             .searchable(text: $searchText, prompt: "Search for a city")
+            .onChange(of: searchText) { _, newValue in
+                Task {
+                    await viewModel.searchCities(query: newValue)
+                }
+            }
             .navigationTitle("Select City")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -29,23 +62,7 @@ struct CitySearchView: View {
                     }
                 }
             }
-            .onAppear {
-                // Load some sample cities
-                cities = [
-                    "London", "New York", "Tokyo", "Paris", "Sydney",
-                    "Berlin", "Moscow", "Dubai", "Singapore", "Hong Kong",
-                    "Rome", "Madrid", "Amsterdam", "Vienna", "Prague",
-                    "Seoul", "Bangkok", "Cairo", "Athens", "Rio de Janeiro"
-                ]
-            }
         }
-    }
-    
-    private var filteredCities: [String] {
-        if searchText.isEmpty {
-            return cities
-        }
-        return cities.filter { $0.localizedCaseInsensitiveContains(searchText) }
     }
 }
 
