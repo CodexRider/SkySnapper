@@ -97,9 +97,11 @@ struct ContentView: View {
     
     private func weatherDetailsView(for weather: WeatherResponse) -> some View {
         HStack(spacing: 30) {
-            WeatherInfoView(title: "Feels like", value: "\(Int(weather.main.feelsLike))°C", icon: "thermometer")
+            WeatherInfoView(title: "Feel like", value: "\(Int(weather.main.feelsLike))°C", icon: "thermometer")
             WeatherInfoView(title: "Humidity", value: "\(weather.main.humidity)%", icon: "humidity")
             WeatherInfoView(title: "Wind", value: "\(Int(weather.wind.speed)) m/s", icon: "wind")
+            
+
         }
     }
     
@@ -139,27 +141,7 @@ struct ContentView: View {
     }
 }
 
-// MARK: - Weather Info View
-struct WeatherInfoView: View {
-    let title: String
-    let value: String
-    let icon: String
-    
-    var body: some View {
-        VStack(spacing: 8) {
-            Image(systemName: icon)
-                .font(.title2)
-                .foregroundStyle(.blue)
-            
-            Text(title)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            
-            Text(value)
-                .font(.headline)
-        }
-    }
-}
+
 
 // MARK: - Preview
 struct ContentView_Previews: PreviewProvider {
