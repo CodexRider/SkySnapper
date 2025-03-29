@@ -63,3 +63,8 @@ fastlane/test_output
 
 # Sensitive Information
 SkySnapper/Config/APIConfig.swift
+
+# IDE and Editor files
+.vscode/
+.cursor/
+buildServer.json
