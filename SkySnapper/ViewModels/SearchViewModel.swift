@@ -7,7 +7,7 @@ class SearchViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var error: Error?
     
-    private let apiKey = "6528b4d25a3c3494f8041cb82ec4efd6"
+    private let apiKey = WeatherAPIConfig.OpenWeather.apiKey
     
     func searchCities(query: String) async {
         guard !query.isEmpty else {
@@ -24,7 +24,7 @@ class SearchViewModel: ObservableObject {
             return
         }
         
-        let urlString = "https://api.openweathermap.org/geo/1.0/direct?q=\(encodedQuery)&limit=10&appid=\(apiKey)"
+        let urlString = "\(WeatherAPIConfig.OpenWeather.geoURL)/direct?q=\(encodedQuery)&limit=10&appid=\(apiKey)"
         
         guard let url = URL(string: urlString) else {
             error = WeatherError.invalidURL

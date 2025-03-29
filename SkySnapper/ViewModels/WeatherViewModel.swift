@@ -9,7 +9,7 @@ class WeatherViewModel: NSObject, ObservableObject {
     @Published var error: Error?
     
     private let locationManager = CLLocationManager()
-    private let apiKey = "6528b4d25a3c3494f8041cb82ec4efd6"
+    private let apiKey = WeatherAPIConfig.OpenWeather.apiKey
     private var locationContinuation: CheckedContinuation<Void, Error>?
     
     override init() {
@@ -50,6 +50,10 @@ class WeatherViewModel: NSObject, ObservableObject {
         case .authorizedWhenInUse, .authorizedAlways:
             // We have permission, start updating location
             locationManager.startUpdatingLocation()
+        
+            error = WeatherError.locationError(NSError(domain: "WeatherViewModel", code: -1, userInfo: [NSLocalizedDescriptionKey: "Unknown authorization status"]))
+            isLoading = false
+            return
         @unknown default:
             error = WeatherError.locationError(NSError(domain: "WeatherViewModel", code: -1, userInfo: [NSLocalizedDescriptionKey: "Unknown authorization status"]))
             isLoading = false
@@ -70,7 +74,7 @@ class WeatherViewModel: NSObject, ObservableObject {
             return
         }
         
-        let urlString = "https://api.openweathermap.org/data/2.5/weather?q=\(encodedCity)&appid=\(apiKey)&units=metric"
+        let urlString = "\(WeatherAPIConfig.OpenWeather.baseURL)/weather?q=\(encodedCity)&appid=\(apiKey)&units=metric"
         print("Request URL: \(urlString)")
         
         guard let url = URL(string: urlString) else {
@@ -121,7 +125,7 @@ extension WeatherViewModel: CLLocationManagerDelegate {
         
         Task { @MainActor in
             do {
-                let url = URL(string: "https://api.openweathermap.org/data/2.5/weather?lat=\(location.coordinate.latitude)&lon=\(location.coordinate.longitude)&appid=\(apiKey)&units=metric")!
+                let url = URL(string: "\(WeatherAPIConfig.OpenWeather.baseURL)/weather?lat=\(location.coordinate.latitude)&lon=\(location.coordinate.longitude)&appid=\(apiKey)&units=metric")!
                 
                 let (data, response) = try await URLSession.shared.data(from: url)
                 
